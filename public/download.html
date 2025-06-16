@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download - ZeroShare</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-shield-alt"></i> ZeroShare</h1>
+            <p class="subtitle">Secure File Download</p>
+        </header>
+
+        <main>
+            <div id="download-section" class="card">
+                <div class="download-info">
+                    <i class="fas fa-file-download download-icon"></i>
+                    <h2>Secure File Download</h2>
+                    <p>Your file is being prepared for download...</p>
+                </div>
+
+                <div id="progress-container" class="progress-container">
+                    <div class="progress-bar-container">
+                        <div id="progress-bar" class="progress-bar"></div>
+                    </div>
+                    <p id="progress-text" class="progress-text">Decrypting file...</p>
+                </div>
+
+                <div id="download-button-container" class="hidden">
+                    <button id="download-button" class="button button-primary">
+                        <i class="fas fa-download"></i> Download File
+                    </button>
+                </div>
+
+                <div class="security-info">
+                    <div class="security-item">
+                        <i class="fas fa-lock"></i>
+                        <span>End-to-end encrypted</span>
+                    </div>
+                    <div>
+                        <p>test</p>
+                    </div>
+                    <div class="security-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Expires in 24 hours</span>
+                    </div>
+                    <div class="security-item">
+                        <i class="fas fa-eye-slash"></i>
+                        <span>One-time download</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Your file is encrypted and can only be accessed with this unique link.</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script>
+        // Utility functions for decryption
+        async function importKey(keyBase64) {
+            const keyData = Uint8Array.from(atob(keyBase64), c => c.charCodeAt(0));
+            return await window.crypto.subtle.importKey(
+                "raw",
+                keyData,
+                {
+                    name: "AES-GCM",
+                    length: 256
+                },
+                true,
+                ["decrypt"]
+            );
+        }
+
+        async function decryptFile(encryptedData, key, iv) {
+            return await window.crypto.subtle.decrypt(
+                {
+                    name: "AES-GCM",
+                    iv: iv
+                },
+                key,
+                encryptedData
+            );
+        }
+
+        // UI Elements
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const downloadButtonContainer = document.getElementById('download-button-container');
+        const downloadButton = document.getElementById('download-button');
+        const toast = document.getElementById('toast');
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            toast.textContent = message;
+            toast.className = `toast toast-${type}`;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Update progress bar
+        function updateProgress(percent) {
+            progressBar.style.width = `${percent}%`;
+            progressText.textContent = `Decrypting file... ${percent}%`;
+        }
+
+        // Parse URL hash
+        function parseUrlHash() {
+            const hash = window.location.hash.substring(1);
+            const [fileId, keyBase64] = hash.split('#');
+            return { fileId, keyBase64 };
+        }
+
+        // Download and decrypt file
+        async function handleDownload() {
+            const { fileId, keyBase64 } = parseUrlHash();
+            
+            if (!fileId || !keyBase64) {
+                showToast('Invalid download link', 'error');
+                return;
+            }
+
+            try {
+                updateProgress(0);
+                
+                // Import the key
+                const key = await importKey(keyBase64);
+                updateProgress(30);
+
+                // Download the encrypted file
+                const response = await fetch(`/api/download/${fileId}`);
+                if (!response.ok) throw new Error('Download failed');
+                
+                const encryptedBlob = await response.blob();
+                updateProgress(60);
+
+                // Read the encrypted data
+                const encryptedData = await encryptedBlob.arrayBuffer();
+                
+                // Extract IV (first 12 bytes) and encrypted content
+                const iv = new Uint8Array(encryptedData.slice(0, 12));
+                const encryptedContent = encryptedData.slice(12);
+
+                // Decrypt the file
+                const decryptedData = await decryptFile(encryptedContent, key, iv);
+                updateProgress(90);
+
+                // Create download link
+                const decryptedBlob = new Blob([decryptedData]);
+                const downloadUrl = URL.createObjectURL(decryptedBlob);
+                
+                // Get filename from response headers
+                const contentDisposition = response.headers.get('Content-Disposition');
+                const filename = contentDisposition
+                    ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+                    : 'downloaded-file';
+
+                // Set up download
+                downloadButton.href = downloadUrl;
+                downloadButton.download = filename;
+                downloadButtonContainer.classList.remove('hidden');
+                updateProgress(100);
+
+                showToast('File decrypted successfully! Click download to save.');
+
+            } catch (error) {
+                console.error('Download failed:', error);
+                showToast('Download failed. The file may have expired or been deleted.', 'error');
+            }
+        }
+
+        // Start download process when page loads
+        window.addEventListener('load', handleDownload);
+    </script>
+</body>
+</html> 

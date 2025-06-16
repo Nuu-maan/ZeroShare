@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZeroShare - Secure File Sharing</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>ZeroShare</h1>
+            <p class="subtitle">Secure, Encrypted File Sharing</p>
+        </header>
+
+        <main>
+            <div class="card">
+                <div id="upload-section">
+                    <div class="upload-area" id="drop-area">
+                        <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                        <h2>Drag & Drop Your File Here</h2>
+                        <p>or click to select a file</p>
+                        <input type="file" id="file-input" style="display: none;">
+                    </div>
+
+                    <div id="file-preview" class="file-preview" style="display: none;">
+                        <i class="fas fa-file file-icon"></i>
+                        <div class="file-info">
+                            <h3 class="file-name"></h3>
+                            <p class="file-size"></p>
+                        </div>
+                    </div>
+
+                    <div class="progress-container" style="display: none;">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="progress-bar"></div>
+                        </div>
+                        <p class="progress-text" id="progress-text">0%</p>
+                    </div>
+
+                    <div style="text-align: center; margin-top: 1.5rem;">
+                        <button id="encrypt-button" class="button button-primary" style="display: none;">
+                            <i class="fas fa-lock" style="margin-right: 0.5rem;"></i> Encrypt & Upload
+                        </button>
+                    </div>
+                </div>
+
+                <div id="share-section" style="display: none;">
+                    <h2>Share Your File Securely</h2>
+                    <p>Your file has been encrypted and uploaded. Share this link with the recipient:</p>
+                    <div class="share-link-container">
+                        <input type="text" id="share-link" readonly>
+                        <button id="copy-button" class="button button-primary">
+                            <i class="fas fa-copy" style="margin-right: 0.5rem;"></i> Copy
+                        </button>
+                    </div>
+                    <p style="font-size: 0.875rem; color: var(--text); opacity: 0.8; margin-top: 1rem;">
+                        <i class="fas fa-shield-alt" style="margin-right: 0.5rem;"></i> This link will expire in 24 hours and can only be downloaded once.
+                    </p>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-8 text-sm text-gray-600">
+            <p>ZeroShare - Secure File Sharing</p>
+            <p class="mt-2">Files are encrypted in your browser before upload</p>
+        </footer>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+    <script src="app.js"></script>
+</body>
+</html> 
