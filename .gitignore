@@ -3,7 +3,7 @@ node_modules/
 package-lock.json
 yarn.lock
 
-# Environment
+# Environment variables
 .env
 .env.local
 .env.*.local
@@ -39,5 +39,7 @@ coverage
 .vscode/
 *.swp
 *.swo
+
+# OS
 .DS_Store
 Thumbs.db 

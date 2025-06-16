@@ -8,8 +8,6 @@ A secure file sharing application with client-side encryption, built with Node.j
 - 🔗 Unique, secure download links
 - ⏱️ Automatic file expiration
 - 🚫 One-time download links
-- 📱 Responsive, modern UI
-- 🎨 Beautiful animations and transitions
 - 🔄 Real-time upload/download progress
 - 📋 Copy to clipboard functionality
 - 🎯 Drag and drop file upload
