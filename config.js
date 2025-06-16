@@ -35,7 +35,7 @@ module.exports = {
 
     // Server Settings
     server: {
-        port: 3000,
+        port: process.env.PORT || 3000,
         uploadDir: 'uploads',
         cors: {
             origin: '*',
@@ -43,7 +43,7 @@ module.exports = {
             allowedHeaders: ['Content-Type']
         },
         database: {
-            uri: process.env.MONGODB_URI || 'mongodb://localhost:27017/zeroshare'
+            uri: process.env.MONGODB_URI
         }
     }
 }; 
